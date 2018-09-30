@@ -15,14 +15,12 @@ import pandas as pd
         
 
 class SKCOMWrapper :
-    def __init__(self,userName, passWord):
+    def __init__(self):
         sys.path.append(os.path.join(os.getcwd(), "dll", "x64"))
         clr.AddReference("Interop.SKCOMLib")
         #clr.AddReference("SKCOM")
         import SKCOMLib as SKCOMLib
         
-        self.userName = userName;
-        self.passWord = passWord;
         
         
         self.SKCOMLib = SKCOMLib
@@ -48,7 +46,12 @@ class SKCOMWrapper :
         
         self.isLogin = False
 
-
+    #input: key.config
+    def importKey(self,configFile)        :
+        key = open('key.config', 'r')
+        self.username = key.readline().split('=')[1].replace('\n','')
+        self.password = key.readline().split('=')[1].replace('\n','')
+        
     def importConfig(self,configFile)        :
         self.config = pd.read_csv(configFile)
         
@@ -56,9 +59,9 @@ class SKCOMWrapper :
         return self.config[self.config.name == key]['settings'].values[0]
         
     def login(self):
-       result = self.SKCenterLib.SKCenterLib_Login (self.userName, self.passWord)
+       result = self.SKCenterLib.SKCenterLib_Login (self.username, self.password)
        if(result == 0):
-           print("Login success: " + self.userName)
+           print("Login success: " + self.username)
            self.isLogin = True;
        else:
            errorMsg(result)
@@ -88,11 +91,11 @@ class SKCOMWrapper :
     def initialOrderSystem(self):
         self.SKOrderLib.SKOrderLib_Initialize();
         self.SKOrderLib.GetUserAccount()
-        self.SKOrderLib.ReadCertByID(self.userName)
+        self.SKOrderLib.ReadCertByID(self.username)
         
     #TODO: finish this    
     def SKOrderLib_SendFutureOrder(self):        
-        bstrLogInID = self.userName
+        bstrLogInID = self.username
         bAsyncOrder = 0
         
         pOrder = self.SKCOMLib.FUTUREORDER()
@@ -121,11 +124,11 @@ class SKCOMWrapper :
         print("order send: "+ test)
         
         
-    def SKOrderLib_GetFutureRights(self,userName, account):
-        self.SKOrderLib.GetFutureRights(userName, account, 1);
+    def SKOrderLib_GetFutureRights(self,username, account):
+        self.SKOrderLib.GetFutureRights(username, account, 1);
                                        
     def SKOrderLib_GetOpenInterest(self):
-        bstrLogInID = self.userName        
+        bstrLogInID = self.username        
         bstrAccount = self.getConfig('tradingAccount')
         print("getOpenInterest " + str(self.SKOrderLib.GetOpenInterest(bstrLogInID,bstrAccount)))
         

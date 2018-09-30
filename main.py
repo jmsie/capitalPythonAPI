@@ -12,7 +12,8 @@ from SKCOMWrapper import SKCOMWrapper
 import time
  
 
-apiTest = SKCOMWrapper(username, password)
+apiTest = SKCOMWrapper()
+apiTest.importKey("key.config")
 apiTest.importConfig("api.config")
 apiTest.login()
 apiTest.connectToQuoteServer();    

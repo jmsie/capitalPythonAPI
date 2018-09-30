@@ -15,10 +15,10 @@ import pandas as pd
         
 
 class SKCOMWrapper :
-    def __init__(self):
-        sys.path.append(os.path.join(os.getcwd(), "dll", "x64"))
-        clr.AddReference("Interop.SKCOMLib")
-        #clr.AddReference("SKCOM")
+    def __init__(self):        
+        #Load the dll
+        clr.AddReference("x64/Interop.SKCOMLib")        
+        #Import the dll 
         import SKCOMLib as SKCOMLib
         
         

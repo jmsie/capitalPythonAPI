@@ -34,7 +34,6 @@ class SKCOMWrapper :
         self.SKOOQuoteLib = self.SKCOMLib.SKOOQuoteLib() #海選報價物件
         self.SKReplyLib = self.SKCOMLib.SKReplyLib() #回報物件
         
-        self.SKCenterLibEvent = SKCenterLibEvent(self)
         self.SKQuoteLibEvent = SKQuoteLibEvent(self)
         self.SKReplyLibEvent = SKReplyLibEventEvent(self)
         self.SKOrderLibEvent = SKOrderLibEvent(self)
@@ -57,6 +56,10 @@ class SKCOMWrapper :
         
     def getConfig(self,key):
         return self.config[self.config.name == key]['settings'].values[0]
+    
+    #The API has this function to interpre the error code
+    def translateCode(self,errorCode):
+        return str(self.SKCenterLib.SKCenterLib_GetReturnCodeMessage(errorCode))
         
     def login(self):
        result = self.SKCenterLib.SKCenterLib_Login (self.username, self.password)
@@ -70,11 +73,13 @@ class SKCOMWrapper :
        return self.isLogin;
    
     def connectToQuoteServer(self):
-        return errorMsg(self.SKQuoteLib.SKQuoteLib_EnterMonitor())
+        print("Connecting to quote server...")
+        msg = errorMsg(self.SKQuoteLib.SKQuoteLib_EnterMonitor())
+        if msg == 0:
+            print("Quote server connected")
+        else:    
+            print("Quote server connect fail: " + self.translateCode(msg))
     
-    #The API has this function to interpre the error code
-    def translateCode(self,errorCode):
-        return str(self.SKCenterLib.SKCenterLib_GetReturnCodeMessage(errorCode))
     
     #TODO Need to active after SKQuoteLibEvent.onConnection == 3003
     def SKQuoteLib_RequestTicks(self):

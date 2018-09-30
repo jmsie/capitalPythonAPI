@@ -15,6 +15,7 @@ clr<br/>
 Provide key.config with the following content
 >username=yourUserName<br/> 
 >password=yourPassword
-## Execution
+Install the COM
+>run ./x64/install.bat
+Run the python API
 ./runServer.bat
-

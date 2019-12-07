@@ -5,66 +5,52 @@ Created on Fri Sep 22 16:30:19 2017
 @author: jeff
 """
 
-from ctypes import *
-import sys, os, clr, time
-import queue as queue
+import comtypes.client
 from errorMsg import errorMsg
 from SKEventWrapper import SKCenterLibEvent,SKQuoteLibEvent,SKReplyLibEventEvent,SKOrderLibEvent
 import pandas as pd
-#import event
-        
+
 
 class SKCOMWrapper :
     def __init__(self):        
         #Load the dll
-        clr.AddReference("x64/Interop.SKCOMLib")        
+        comtypes.client.GetModule(r'./x64/SKCOM.dll')
         #Import the dll 
-        import SKCOMLib as SKCOMLib
-        
-        
-        
-        self.SKCOMLib = SKCOMLib
-        self.SKTICK = SKCOMLib.SKTICK ()
-        self.FUTUREORDER = SKCOMLib.FUTUREORDER ()        
-        self.SKCenterLib = SKCOMLib.SKCenterLib() #登入 環境設定
-        self.SKQuoteLib = SKCOMLib.SKQuoteLib() #國內報價物件
-        
-        self.SKOrderLib = self.SKCOMLib.SKOrderLib() #下單物件
-        self.SKOSQuoteLib = self.SKCOMLib.SKOSQuoteLib() #海期報價物件
-        self.SKOOQuoteLib = self.SKCOMLib.SKOOQuoteLib() #海選報價物件
-        self.SKReplyLib = self.SKCOMLib.SKReplyLib() #回報物件
-        
+        import comtypes.gen.SKCOMLib as sk
+
+        self.SKCenterLib = comtypes.client.CreateObject(sk.SKCenterLib,interface=sk.ISKCenterLib)#登入 環境設定
+        self.SKQuoteLib = comtypes.client.CreateObject(sk.SKQuoteLib,interface=sk.ISKQuoteLib) #國內報價物件
+        self.SKOrderLib = comtypes.client.CreateObject(sk.SKOrderLib,interface=sk.ISKOrderLib) #下單物件
+        self.SKOSQuoteLib = comtypes.client.CreateObject(sk.SKOSQuoteLib, interface=sk.ISKOSQuoteLib) #海期報價物件
+        self.SKOOQuoteLib = comtypes.client.CreateObject(sk.SKOOQuoteLib, interface=sk.ISKOOQuoteLib) #海選報價物件
+        self.SKReplyLib = comtypes.client.CreateObject(sk.SKReplyLib,interface=sk.ISKReplyLib) #回報物件
+
+        self.SKCenterLibEvent = SKCenterLibEvent()
         self.SKQuoteLibEvent = SKQuoteLibEvent(self)
         self.SKReplyLibEvent = SKReplyLibEventEvent(self)
         self.SKOrderLibEvent = SKOrderLibEvent(self)
-        
-        self.SKCenterLibEvent.bind(self.SKCenterLib)
-        self.SKQuoteLibEvent.bind(self.SKQuoteLib)
-        self.SKReplyLibEvent.bind(self.SKReplyLib)
-        self.SKOrderLibEvent.bind(self.SKOrderLib)
-        
+
+        SKCenterLibEventHandler = comtypes.client.GetEvents(self.SKCenterLib, self.SKCenterLibEvent)
+        SKQuoteLibEventHandler = comtypes.client.GetEvents(self.SKQuoteLib, self.SKQuoteLibEvent)
+
         self.isLogin = False
 
     #input: key.config
-    def importKey(self,configFile)        :
-        key = open('key.config', 'r')
-        self.username = key.readline().split('=')[1].replace('\n','')
-        self.password = key.readline().split('=')[1].replace('\n','')
-        
-    def importConfig(self,configFile)        :
-        self.config = pd.read_csv(configFile)
-        
-    def getConfig(self,key):
-        return self.config[self.config.name == key]['settings'].values[0]
-    
+    def setKey(self, key):
+        self.key = key
+
+    def setTradingConfig(self, config):
+        self.config = config
+
     #The API has this function to interpre the error code
     def translateCode(self,errorCode):
         return str(self.SKCenterLib.SKCenterLib_GetReturnCodeMessage(errorCode))
         
     def login(self):
-       result = self.SKCenterLib.SKCenterLib_Login (self.username, self.password)
+       result = self.SKCenterLib.SKCenterLib_Login (self.key.get('username'),
+                                                    self.key.get('password'))
        if(result == 0):
-           print("Login success: " + self.username)
+           print("Login success: " + self.key.get('username'))
            self.isLogin = True;
        else:
            errorMsg(result)

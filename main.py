@@ -1,24 +1,19 @@
-# -*- coding: utf-8 -*-
 """
 Created on Fri Sep 22 16:28:46 2017
-http://kwedr.blogspot.tw/2017/07/api-python-pythonnet.html
 @author: jeff
 """
 
-# -*- coding: utf-8 -*-
-
-from errorMsg import errorMsg
-from SKCOMWrapper import SKCOMWrapper
 import time
- 
+from SKCOMWrapper import SKCOMWrapper
+from config import trading_settings, key
 
 apiTest = SKCOMWrapper()
-apiTest.importKey("key.config")
-apiTest.importConfig("api.config")
+apiTest.setKey(key)
+apiTest.setTradingConfig(trading_settings)
 apiTest.login()
-apiTest.connectToQuoteServer();    
-time.sleep(10)    
-apiTest.SKQuoteLib_RequestTicks()
+#apiTest.connectToQuoteServer();
+#time.sleep(10)
+#apiTest.SKQuoteLib_RequestTicks()
 
 
 

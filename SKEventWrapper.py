@@ -5,36 +5,20 @@ Created on Sun Sep 24 21:47:41 2017
 @author: jeff
 """
 import time
-class SKCenterLibEvent:
-    def __init__(self, parent):
-        self.parent = parent
-
-    def bind(self, obj):
-        obj.OnTimer += self.onTimer
-        print("SKCenterLib event engine started")
-
+class SKCenterLibEvent():
     def onTimer(self, nTime):
         print ("onTimer: " + str(nTime))
         
     def onShowAgreement(self, bstrData):
         print ("onShowAgreement: " + str(bstrData))
 ##########################################################################
-class SKQuoteLibEvent:
+class SKQuoteLibEvent():
     def __init__(self, parent):
         self.parent = parent
-        
-    def bind(self, obj):
-        obj.OnConnection += self.onConnection
-        obj.OnNotifyQuote += self.onNotifyQuote
-        obj.OnNotifyHistoryTicks += self.onNotifyHistoryTicks
-        obj.OnNotifyTicks += self.onNotifyTicks
-        obj.OnNotifyKLineData += self.onNotifyKLineData
-        print("SKQuoteLib event engine started")
 
     def onConnection(self, nKind, nCode):
         print ("OnConnection: code:" + self.parent.translateCode(nKind) + " error:" + self.parent.translateCode(nCode))
-        
-       
+
     def onNotifyQuote(self, sMarketNo, sIndex):        
         pass
     
@@ -55,10 +39,6 @@ class SKQuoteLibEvent:
 class SKReplyLibEventEvent:
     def __init__(self, parent):
         self.parent = parent
-        
-    def bind(self, obj):
-        obj.OnDisconnect += self.onDisconnect
-        print("SKReplyLibEventEvent event engine started")
 
     def onDisconnect(self,userId,errorCode):
         print("Disconnected: " + userId)
@@ -67,12 +47,7 @@ class SKReplyLibEventEvent:
 class SKOrderLibEvent:
     def __init__(self, parent):
         self.parent = parent
-    def bind(self, obj):
-        obj.OnAccount += self.onAccount
-        #obj.OnFutureRights += self.onFutureRights
-        obj.OnOpenInterest += self.onOpenInterest
-        print("SKOrderLibEvent event engine started")
-    
+
     def onAccount(self,bstrLogInID, bstrAccountData):
         print("Account on: " + bstrLogInID +  " =>" + bstrAccountData)
         self.parent.accountList = bstrAccountData
